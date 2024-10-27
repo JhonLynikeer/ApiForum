@@ -2,24 +2,22 @@ package br.com.alura.demo.service
 
 import br.com.alura.demo.model.Curso
 import br.com.alura.demo.model.Usuario
+import br.com.alura.demo.repository.UsuarioRepository
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Service
 
 @Service
-class UsuarioService(var usuarios: List<Usuario>) {
+class UsuarioService(private val repository: UsuarioRepository) : UserDetailsService {
 
-    init {
-        val usuario = Usuario(
-                id = 1,
-                nome = "Ana Loka",
-                email = "Ana@dadad.com"
-        )
-        usuarios = listOf(usuario)
-    }
 
     fun buscarPorId(id: Long): Usuario {
-        return usuarios.stream().filter {
-            it.id == id
-        }.findFirst().get()
+        return repository.getOne(id)
+    }
+
+    override fun loadUserByUsername(username: String?): UserDetails {
+       val usuario = repository.findByEmail(username) ?: throw RuntimeException()
+       return UserDetail(usuario)
     }
 
 }

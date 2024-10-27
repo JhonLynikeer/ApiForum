@@ -1,24 +1,14 @@
 package br.com.alura.demo.service
 
 import br.com.alura.demo.model.Curso
+import br.com.alura.demo.repository.CursoRepository
+import br.com.alura.demo.repository.UsuarioRepository
 import org.springframework.stereotype.Service
 
 @Service
-class CursoService(var cursos: List<Curso>) {
-
-    init {
-        val curso = Curso(
-                id = 1,
-                nome = "Koltin",
-                categoria = "Rpogramaçao"
-        )
-        cursos = listOf(curso)
-    }
-
+class CursoService(private val repository: CursoRepository) {
     fun buscarPorId(id: Long): Curso {
-        return cursos.stream().filter {
-            it.id == id
-        }.findFirst().get()
+        return repository.getOne(id)
     }
 
 }
