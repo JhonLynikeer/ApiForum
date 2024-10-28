@@ -1,9 +1,6 @@
 package br.com.alura.demo.service
 
-import br.com.alura.demo.dto.NovoTopicoForm
-import br.com.alura.demo.dto.TopicoPorCategoriaDto
-import br.com.alura.demo.dto.TopicoView
-import br.com.alura.demo.dto.UpdateTopicoForm
+import br.com.alura.demo.dto.*
 import br.com.alura.demo.exception.NotFoundExcepetion
 import br.com.alura.demo.mapper.TopicoFormMapper
 import br.com.alura.demo.mapper.TopicoViewMapper
@@ -53,9 +50,12 @@ class TopicoService(
         return topicoViewMapper.map(topico)
     }
 
+
+
     fun update(form: UpdateTopicoForm) : TopicoView{
         val topico = repository.findById(form.id)
             .orElseThrow { NotFoundExcepetion(notFoundExcepetion)}
+
         topico.titulo = form.titulo
         topico.mensagem = form.mensagem
         return topicoViewMapper.map(topico)

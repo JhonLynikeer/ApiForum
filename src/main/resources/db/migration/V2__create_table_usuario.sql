@@ -5,4 +5,4 @@ CREATE table usuario(
     primary key (id)
 );
 
-insert into usuario values(1, 'Ana da Silva', 'Email@email.com');
+insert into usuario values(1, 'Ana da Silva', 'ana@email.com');

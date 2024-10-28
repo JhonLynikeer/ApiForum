@@ -1,40 +1,60 @@
 package br.com.alura.demo.config
 
+import br.com.alura.demo.model.Role
+import br.com.alura.demo.service.UsuarioService
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.security.Keys
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.Authentication
+import org.springframework.security.core.GrantedAuthority
 import org.springframework.stereotype.Component
 import java.util.Date
+import javax.crypto.SecretKey
 
 @Component
-class JWTUtil {
+class JWTUtil(
+    private val service : UsuarioService
+) {
 
-    val expitation: Long = 60000
+    val expiration: Long = 60000
+
     @Value("\${jwt.secret}")
-    private lateinit var secret : String
-    fun generateToken(username: String): String? {
+    private lateinit var secret: String
+
+    // Utilizando uma única chave secreta para assinar e validar
+    private val keySecret: SecretKey
+        get() = Keys.hmacShaKeyFor(secret.toByteArray())
+
+    fun generateToken(username: String, authorities: MutableCollection<out GrantedAuthority>): String {
         return Jwts.builder()
             .setSubject(username)
-            .setExpiration(Date(System.currentTimeMillis() + expitation))
-            .signWith(SignatureAlgorithm.ES512, secret.toByteArray())
+            .claim("role", authorities)
+            .setExpiration(Date(System.currentTimeMillis() + expiration))
+            .signWith(keySecret) // Usando keySecret para assinar
             .compact()
     }
 
     fun isValid(jwt: String?): Boolean {
         return try {
-            Jwts.parser().setSigningKey(secret.toByteArray()).build()
+            Jwts.parser()
+                .setSigningKey(keySecret) // Usando keySecret para validar
+                .build()
+                .parseClaimsJws(jwt)
             true
-        } catch (e: IllegalArgumentException){
+        } catch (e: Exception) {
             false
         }
     }
 
-    fun getAuthentication(jwt: String?) : Authentication {
-        val username = Jwts.parser().setSigningKey(secret.toByteArray()).build()
-        return UsernamePasswordAuthenticationToken(username, null, null)
-    }
+    fun getAuthentication(jwt: String?): UsernamePasswordAuthenticationToken {
+        val username = Jwts.parser()
+            .setSigningKey(keySecret) // Usando keySecret para validar
+            .build()
+            .parseClaimsJws(jwt)
+            .body.subject
+        val user = service.loadUserByUsername(username)
 
+        return UsernamePasswordAuthenticationToken(username, null, user.authorities)
+    }
 }

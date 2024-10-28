@@ -15,4 +15,4 @@ spring:
       enable: true
 
 jwt:
-  secret: secreto
+  secret: suaChaveSuperSecretaComMaisDe32Caracteres1234

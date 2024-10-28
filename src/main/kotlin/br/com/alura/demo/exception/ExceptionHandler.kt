@@ -61,5 +61,19 @@ class ExceptionHandler {
 
     }
 
+    @ExceptionHandler(AccessDeniedException::class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    fun handleAccessDenied(
+        exception: AccessDeniedException,
+        request: HttpServletRequest
+    ): ErrorView {
+        return ErrorView(
+            status = HttpStatus.FORBIDDEN.value(),
+            error = HttpStatus.FORBIDDEN.name,
+            message = "Você precisa estar autenticado",
+            path = request.servletPath
+        )
+    }
+
 
 }
