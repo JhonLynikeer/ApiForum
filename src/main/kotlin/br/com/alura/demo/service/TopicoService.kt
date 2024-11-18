@@ -11,6 +11,7 @@ import jakarta.persistence.EntityManager
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.stream.Collectors
 
 @Service
@@ -19,7 +20,7 @@ class TopicoService(
     private val topicoViewMapper: TopicoViewMapper,
     private val topicoFormMapper: TopicoFormMapper,
     private val notFoundExcepetion: String = "Topico nao encontrado",
-    private val em: EntityManager
+
 ) {
 
 
@@ -27,7 +28,6 @@ class TopicoService(
         nomeCurso: String?,
         paginacao: Pageable
     ): Page<TopicoView> {
-        println(em)
         val topicos = if (nomeCurso == null){
             repository.findAll(paginacao)
         } else {
@@ -58,6 +58,7 @@ class TopicoService(
 
         topico.titulo = form.titulo
         topico.mensagem = form.mensagem
+        topico.dataAlteracao = LocalDate.now()
         return topicoViewMapper.map(topico)
     }
 

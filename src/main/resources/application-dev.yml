@@ -1,19 +1,18 @@
 spring:
   datasource:
-    driverClassName: org.h2.Driver
-    url: jdbc:h2:mem:forum
-    username: sa
-    password:
+    driverclassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/forum
+    username: root
+    password: Hellen@15
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
     properties:
       hibernate:
-        show_sql: true
-        format_sql: true
+        show sql: true
+        format sql: true
+
   h2:
     console:
-      enable: true
-
+      enabled: true
 jwt:
   secret: suaChaveSuperSecretaComMaisDe32Caracteres1234
   #mvn spring-boot:run "-Dspring.profiles.active=prod"
