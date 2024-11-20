@@ -1,17 +1,16 @@
 package br.com.alura.demo.controller
 
 import br.com.alura.demo.config.JWTUtil
-import br.com.alura.demo.configuration.DataBaseConfigurationTest
+import br.com.alura.demo.configuration.DatabaseContainerConfiguration
 import br.com.alura.demo.model.Role
+import br.com.alura.demo.model.UsuarioTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.get
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
@@ -19,8 +18,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-class TopicoControllerTest : DataBaseConfigurationTest() {
+class TopicoControllerTest : DatabaseContainerConfiguration() {
 
     @Autowired
     private lateinit var webApplicationContext: WebApplicationContext
@@ -30,45 +28,46 @@ class TopicoControllerTest : DataBaseConfigurationTest() {
 
     private lateinit var mockMvc: MockMvc
 
-    private var token: String? = null
+    private var jwt: String? = null
 
     companion object {
-        private const val RECURSO = "/topicos"
-        private const val RECURSO_ID = RECURSO.plus("%s")
+        private const val TOKEN = "%s"
+        private const val URI = "/topicos"
+        private const val URI_WITH_PARAM = URI.plus("/%s")
     }
 
     @BeforeEach
-    fun setup(){
-        token = generateToken()
-
+    fun setup() {
+        jwt = generateToken()
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
             .apply<DefaultMockMvcBuilder?>(
-                SecurityMockMvcConfigurers.springSecurity()).build()
-
+                SecurityMockMvcConfigurers
+                    .springSecurity()).build()
     }
 
     @Test
-    fun `deve retornar codigo 400 quando chamar topicos sem token`() {
-        mockMvc.get(RECURSO).andExpect { status { is4xxClientError() } }
+    fun `deve retornar codigo 400 quando chamar topicos sem autenticacao`() {
+        mockMvc.get(URI).andExpect { status { is4xxClientError() } }
     }
 
     @Test
-    fun `deve retornar codigo 200 quando chamar tópico com token`() {
-        mockMvc.get(RECURSO) {
-            headers { token?.let { this.setBearerAuth(it) } }
-        }.andExpect { status { is2xxSuccessful() } } }
+    fun `deve retornar codigo 200 quando chamar topicos e usuario estiver autenticado`() {
+        mockMvc.get(URI) {
+            headers { this.setBearerAuth(TOKEN.format(jwt)) }
+        }.andExpect { status { isOk() } }
+    }
 
     @Test
-    fun `deve retornar codigo 200 quando chamar tópico por id com token`() {
-        mockMvc.get(RECURSO_ID.format("/1")) {
-            headers { token?.let { this.setBearerAuth(it) } }
-        }.andExpect { status { is2xxSuccessful() } } }
-
-
+    fun `deve retornar codigo 200 quando chamar topicos por id e usuario estiver autenticado`() {
+        mockMvc.get(URI_WITH_PARAM.format("1")) {
+            headers { this.setBearerAuth(TOKEN.format(jwt)) }
+        }.andExpect { status { isOk() } }
+    }
 
     private fun generateToken(): String? {
         val authorities = mutableListOf(Role(1, "LEITURA_ESCRITA"))
-        return jwtUtil.generateToken("ana@email.com", authorities)
-    }
+        val usuario = UsuarioTest.buildToToken()
 
+        return jwtUtil.generateToken(usuario.email, authorities)
+    }
 }
