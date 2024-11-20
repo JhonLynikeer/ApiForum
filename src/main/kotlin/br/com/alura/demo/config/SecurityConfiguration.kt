@@ -29,6 +29,8 @@ class SecurityConfiguration(
     fun filterChain(http: HttpSecurity, authManager: AuthenticationManager): SecurityFilterChain {
         http.authorizeHttpRequests { it
             .requestMatchers("/topicos").hasAuthority("LEITURA_ESCRITA")
+            .requestMatchers("/respostas").hasAuthority("LEITURA_ESCRITA")
+            .requestMatchers("/relatorios").hasAuthority("ADMIN")
             .requestMatchers(HttpMethod.POST, "/login").permitAll()
             .requestMatchers(HttpMethod.GET, "/swagger-ui/*").permitAll()
             .requestMatchers(HttpMethod.GET, "/swagger-ui.html/").permitAll()

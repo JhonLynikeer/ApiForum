@@ -37,11 +37,11 @@ import org.springframework.web.util.UriComponentsBuilder
 @RequestMapping("/topicos")
 class TopicoController(private val service: TopicoService) {
 
+
     @GetMapping
-    @Cacheable("topicos")
     fun listar(
         @RequestParam(required = false) nomeCurso: String?,
-        @PageableDefault(size = 100, sort = ["dataCriacao"], direction = Sort.Direction.DESC) paginacao: Pageable
+        @PageableDefault(size = 5, sort = ["dataCriacao"], direction = Sort.Direction.DESC) paginacao: Pageable
     ): Page<TopicoView> {
         return service.listar(nomeCurso, paginacao)
     }
@@ -53,7 +53,6 @@ class TopicoController(private val service: TopicoService) {
 
     @PostMapping
     @Transactional
-    @CacheEvict(value = ["topicos"], allEntries = true)
     fun cadastrar(
         @RequestBody @Valid form: NovoTopicoForm,
         uriBuilder: UriComponentsBuilder
@@ -65,7 +64,6 @@ class TopicoController(private val service: TopicoService) {
 
     @PutMapping
     @Transactional
-    @CacheEvict(value = ["topicos"], allEntries = true)
     fun atulaizar(@RequestBody @Valid form: UpdateTopicoForm): ResponseEntity<TopicoView> {
         val topicoView = service.update(form)
         return ResponseEntity.ok(topicoView)
@@ -73,19 +71,18 @@ class TopicoController(private val service: TopicoService) {
 
     @DeleteMapping("/{id}")
     @Transactional
-    @CacheEvict(value = ["topicos"], allEntries = true)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deletar(@PathVariable id: Long) {
         service.deletar(id)
     }
 
     @GetMapping("/relatorio")
-    fun relatorio(): List<TopicoPorCategoriaDto>{
+    fun relatorio(): List<TopicoPorCategoriaDto> {
         return service.relatorio()
     }
 
     @GetMapping("/notresponse")
-    fun topicosNaoRespondidos(): List<Topico>{
+    fun topicosNaoRespondidos(): List<Topico> {
         return service.topicosNaoRespondidos()
     }
 

@@ -8,6 +8,8 @@ import br.com.alura.demo.model.Topico
 import br.com.alura.demo.repository.TopicoRepository
 import br.com.alura.demo.repository.UsuarioRepository
 import jakarta.persistence.EntityManager
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -23,7 +25,7 @@ class TopicoService(
 
 ) {
 
-
+    @Cacheable(cacheNames = ["Topicos"], key = "#root.method.name")
     fun listar(
         nomeCurso: String?,
         paginacao: Pageable
@@ -44,6 +46,7 @@ class TopicoService(
         return topicoViewMapper.map(topico)
     }
 
+    @CacheEvict(cacheNames = ["Topicos"], allEntries = true)
     fun cadastrar(form: NovoTopicoForm) : TopicoView {
         val topico = topicoFormMapper.map(form)
         repository.save(topico)
@@ -51,7 +54,7 @@ class TopicoService(
     }
 
 
-
+    @CacheEvict(cacheNames = ["Topicos"], allEntries = true)
     fun update(form: UpdateTopicoForm) : TopicoView{
         val topico = repository.findById(form.id)
             .orElseThrow { NotFoundExcepetion(notFoundExcepetion)}
@@ -62,6 +65,7 @@ class TopicoService(
         return topicoViewMapper.map(topico)
     }
 
+    @CacheEvict(cacheNames = ["Topicos"], allEntries = true)
     fun deletar(id: Long) {
         repository.deleteById(id)
     }
