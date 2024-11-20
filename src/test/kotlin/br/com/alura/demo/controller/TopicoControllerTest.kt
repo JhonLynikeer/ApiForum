@@ -1,6 +1,7 @@
 package br.com.alura.demo.controller
 
 import br.com.alura.demo.config.JWTUtil
+import br.com.alura.demo.configuration.DataBaseConfigurationTest
 import br.com.alura.demo.model.Role
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -13,9 +14,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
+import org.testcontainers.junit.jupiter.Testcontainers
 
+@Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class TopicoControllerTest {
+class TopicoControllerTest : DataBaseConfigurationTest() {
 
     @Autowired
     private lateinit var webApplicationContext: WebApplicationContext
