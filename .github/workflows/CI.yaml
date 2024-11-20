@@ -25,17 +25,14 @@ jobs:
           --health-retries=5
 
     steps:
-      # Checkout do código
       - uses: actions/checkout@v3
 
-      # Configuração do Java 17
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # Cache de dependências Maven
       - name: Cache de dependências Maven
         uses: actions/cache@v3
         with:
@@ -44,23 +41,19 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-m2
 
-      # Esperar o MySQL iniciar antes dos testes (opcional)
+      - name: Check MySQL Service
+        run: mysql -u root -proot -e "SHOW DATABASES;"
+
       - name: Wait for MySQL
         run: until mysqladmin ping -h 127.0.0.1 --silent; do echo "Waiting for MySQL..."; sleep 5; done;
 
-      # Executar testes com Maven
       - name: Executar testes
         run: mvn -B clean test
 
-      # Etapa de depuração adicional (caso testes falhem)
       - name: Run tests with debug
         if: failure()
         run: mvn test -X
 
-      # Exibir logs do sistema
-      - name: Print environment logs
+      - name: Exibir Logs
         if: failure()
-        run: |
-          echo "JAVA_HOME: $JAVA_HOME"
-          echo "Maven Version:"
-          mvn -version
+        run: cat target/surefire-reports/*.txt
