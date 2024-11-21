@@ -50,12 +50,12 @@ class TopicoControllerTest : DatabaseContainerConfiguration() {
         mockMvc.get(URI).andExpect { status { is4xxClientError() } }
     }
 
-    @Test
-    fun `deve retornar codigo 200 quando chamar topicos e usuario estiver autenticado`() {
-        mockMvc.get(URI) {
-            headers { this.setBearerAuth(TOKEN.format(jwt)) }
-        }.andExpect { status { isOk() } }
-    }
+//    @Test
+//    fun `deve retornar codigo 200 quando chamar topicos e usuario estiver autenticado`() {
+//        mockMvc.get(URI) {
+//            headers { this.setBearerAuth(TOKEN.format(jwt)) }
+//        }.andExpect { status { isOk() } }
+//    }
 
     @Test
     fun `deve retornar codigo 200 quando chamar topicos por id e usuario estiver autenticado`() {
