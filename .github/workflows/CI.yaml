@@ -19,7 +19,7 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping --silent"
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -P 3306 --silent"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -41,19 +41,21 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-m2
 
-      - name: Check MySQL Connection
-        run: mysql -h 127.0.0.1 -P 3306 -u root -proot -e "SHOW DATABASES;"
+      - name: Verificar Conexão com MySQL
+        run: |
+          echo "Aguardando MySQL ficar disponível..."
+          until mysqladmin ping -h 127.0.0.1 -P 3306 --silent; do
+            echo "MySQL ainda não disponível. Tentando novamente em 5 segundos..."
+            sleep 5
+          done
+          echo "MySQL está disponível."
 
-      - name: Wait for MySQL
-        run: until mysqladmin ping -h 127.0.0.1 -P 3306 --silent; do echo "Waiting for MySQL..."; sleep 5; done;
+      - name: Mostrar Bancos de Dados
+        run: mysql -h 127.0.0.1 -P 3306 -u root -proot -e "SHOW DATABASES;"
 
       - name: Executar testes
         run: mvn -B clean test
 
-      - name: Run tests with debug
-        if: failure()
-        run: mvn test -X
-
-      - name: Exibir Logs
+      - name: Exibir logs de erro
         if: failure()
         run: cat target/surefire-reports/*.txt
